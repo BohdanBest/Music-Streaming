@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  # --- KEYCLOAK (Сервер авторизації) ---
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    container_name: music-keycloak
+    command: start-dev --import-realm
+    volumes:
+      - ./realm-config:/opt/keycloak/data/import
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=keycloak-db
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=password
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8088:8080" # Keycloak доступний на порту 8088
+    depends_on:
+      - keycloak-db
+
+  # База даних для Keycloak
+  keycloak-db:
+    image: postgres:16
+    container_name: music-keycloak-db
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5433:5432" # Зовнішній порт 5433
+
+  # --- CATALOG SERVICE DATABASE ---
+  catalog-db:
+    image: postgres:16
+    container_name: music-catalog-db
+    environment:
+      - POSTGRES_DB=catalog_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - PGTZ=UTC
+    ports:
+      - "5434:5432" # Зовнішній порт 5434
+
+  # --- PLAYLIST SERVICE DATABASE ---
+  playlist-db:
+    image: postgres:16
+    container_name: music-playlist-db
+    environment:
+      - POSTGRES_DB=playlist_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - PGTZ=UTC
+    ports:
+      - "5435:5432" # Зовнішній порт 5435

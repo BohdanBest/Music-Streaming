@@ -1,17 +1,16 @@
 package com.bohdanbest.catalog;
 
-public class Track {
-    public Long id;
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Entity;
+
+@Entity
+public class Track extends PanacheEntity {
     public String title;
     public String artist;
     public String album;
-    public int durationSeconds;
 
-    public Track(Long id, String title, String artist, String album, int durationSeconds) {
-        this.id = id;
-        this.title = title;
-        this.artist = artist;
-        this.album = album;
-        this.durationSeconds = durationSeconds;
+    // Метод для пошуку
+    public static java.util.List<Track> findByArtist(String artist) {
+        return list("LOWER(artist) LIKE LOWER(?1)", "%" + artist + "%");
     }
 }

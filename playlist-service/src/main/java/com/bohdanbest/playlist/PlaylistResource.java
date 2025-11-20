@@ -1,54 +1,51 @@
 package com.bohdanbest.playlist;
 
+import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import com.bohdanbest.playlist.client.CatalogRestClient;
-import com.bohdanbest.playlist.client.Track;
+import com.bohdanbest.playlist.client.CatalogClient;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-
 import java.util.List;
 
 @Path("/playlists")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@Authenticated
 public class PlaylistResource {
 
-    @Inject
-    InMemoryPlaylistRepository playlistRepository;
-
-    @Inject
-    @RestClient
-    CatalogRestClient catalogRestClient;
+    @Inject SecurityIdentity identity;
+    @Inject @RestClient CatalogClient catalogClient;
 
     @GET
-    public List<Playlist> getAllPlaylists() {
-        return playlistRepository.findAll();
+    public List<Playlist> getMyPlaylists() {
+        return Playlist.findByOwner(identity.getPrincipal().getName());
     }
 
     @POST
-    @Path("/{playlistId}/tracks")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Playlist addTrackToPlaylist(@PathParam("playlistId") Long playlistId, TrackIdRequest request) {
-        try {
-            catalogRestClient.getTrackById(request.trackId);
-        } catch (WebApplicationException e) {
-            if (e.getResponse().getStatus() == 404) {
-                throw new NotFoundException("Track with id " + request.trackId + " not found in catalog.");
-            }
-            throw e;
-        }
-
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new NotFoundException("Playlist not found"));
-
-        if (!playlist.trackIds.contains(request.trackId)) {
-            playlist.trackIds.add(request.trackId);
-        }
-
+    @Transactional
+    public Playlist create(Playlist playlist) {
+        playlist.owner = identity.getPrincipal().getName();
+        playlist.persist();
         return playlist;
     }
 
-    public static class TrackIdRequest {
-        public Long trackId;
+    @POST
+    @Path("/{id}/tracks")
+    @Transactional
+    public Playlist addTrack(@PathParam("id") Long id, Long trackId) {
+
+        try { catalogClient.getTrack(trackId); }
+        catch (Exception e) { throw new NotFoundException("Track not found"); }
+
+        // 2. Додавання
+        Playlist playlist = Playlist.findById(id);
+        if (playlist == null || !playlist.owner.equals(identity.getPrincipal().getName())) {
+            throw new NotFoundException();
+        }
+        playlist.trackIds.add(trackId);
+        return playlist;
     }
 }

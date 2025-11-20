@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Music App</title>
+    <style>body { font-family: sans-serif; padding: 20px; }</style>
+</head>
+<body>
+<div style="float: right"><a href="/logout">Logout</a></div>
+<h1>Music Streaming 🎵</h1>
+
+<div style="display: flex; gap: 50px;">
+    <div>
+        <h2>My Playlists</h2>
+        <ul>
+            {#for p in playlists}
+                <li><strong>{p.name}</strong> (Tracks: {p.trackIds.size})</li>
+            {/for}
+        </ul>
+        <form action="/create-playlist" method="POST">
+            <input type="text" name="name" placeholder="New Playlist Name" required>
+            <button type="submit">Create</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Find Music</h2>
+        <form action="/" method="GET">
+            <input type="text" name="search" placeholder="Artist name (e.g. Queen)">
+            <button type="submit">Search</button>
+        </form>
+
+        {#if tracks}
+            <ul>
+                {#for t in tracks}
+                    <li>{t.artist} - {t.title}</li>
+                {/for}
+            </ul>
+        {/if}
+    </div>
+</div>
+</body>
+</html>

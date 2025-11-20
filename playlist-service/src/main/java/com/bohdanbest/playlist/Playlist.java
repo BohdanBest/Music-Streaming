@@ -1,17 +1,22 @@
 package com.bohdanbest.playlist;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Playlist {
-    public Long id;
+@Entity
+public class Playlist extends PanacheEntity {
     public String name;
-    public Long userId;
+    public String owner; // Зберігаємо логін юзера (наприклад, "alice")
+
+    @ElementCollection(fetch = FetchType.EAGER)
     public List<Long> trackIds = new ArrayList<>();
 
-    public Playlist(Long id, String name, Long userId) {
-        this.id = id;
-        this.name = name;
-        this.userId = userId;
+    public static List<Playlist> findByOwner(String owner) {
+        return list("owner", owner);
     }
 }

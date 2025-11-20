@@ -1,0 +1,26 @@
+{
+  "realm": "music-streaming",
+  "enabled": true,
+  "roles": { "realm": [ { "name": "user" }, { "name": "admin" } ] },
+  "users": [
+    {
+      "username": "alice", "enabled": true, "email": "alice@test.com",
+      "credentials": [{ "type": "password", "value": "alice" }],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "admin", "enabled": true, "email": "admin@test.com",
+      "credentials": [{ "type": "password", "value": "admin" }],
+      "realmRoles": ["user", "admin"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "ui-service", "publicClient": true, "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost:8083/*"], "webOrigins": ["+"]
+    },
+    { "clientId": "catalog-service", "bearerOnly": true },
+    { "clientId": "playlist-service", "bearerOnly": true },
+    { "clientId": "user-service", "bearerOnly": true }
+  ]
+}

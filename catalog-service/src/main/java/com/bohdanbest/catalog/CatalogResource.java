@@ -1,26 +1,37 @@
 package com.bohdanbest.catalog;
 
-import jakarta.inject.Inject;
+import io.quarkus.security.Authenticated;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/tracks")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@Authenticated
 public class CatalogResource {
 
-    @Inject
-    InMemoryCatalogRepository catalogRepository;
-
     @GET
-    public List<Track> getAllTracks() {
-        return catalogRepository.findAll();
+    public List<Track> getAll(@QueryParam("artist") String artist) {
+        if (artist != null && !artist.isBlank()) {
+            return Track.findByArtist(artist);
+        }
+        return Track.listAll();
+    }
+
+    @POST
+    @Transactional
+    @RolesAllowed("admin") // Тільки адмін може додавати через REST
+    public Track add(Track track) {
+        track.persist();
+        return track;
     }
 
     @GET
     @Path("/{id}")
-    public Track getTrackById(@PathParam("id") Long id) {
-        return catalogRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Track not found"));
+    public Track getById(@PathParam("id") Long id) {
+        return Track.findById(id);
     }
 }
