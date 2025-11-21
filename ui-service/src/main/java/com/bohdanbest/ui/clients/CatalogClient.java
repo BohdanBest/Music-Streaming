@@ -17,6 +17,11 @@ public interface CatalogClient {
 
     @GET
     List<TrackDto> search(@QueryParam("artist") String query);
+
+    @GET
+    @Path("/recommendations")
+    List<TrackDto> getRecommendations();
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     void create(TrackDto track);

@@ -6,324 +6,500 @@
     <title>Music Platform</title>
     <style>
         :root {
-            /* Палітра кольорів (Dark + Purple) */
-            --bg-main: #121212;
-            --bg-card: #181818;
-            --bg-hover: #282828;
-            --bg-input: #3e3e3e;
-            --bg-modal: rgba(0, 0, 0, 0.7);
+            /* --- SOFT DARK PALETTE --- */
+            --bg-base: #121212;       /* Основний фон (м'який темний) */
+            --bg-sidebar: #121212;    /* Сайдбар зливається з фоном */
+            --bg-main: #121212;       /* Центр теж */
 
-            --text-main: #ffffff;
-            --text-muted: #b3b3b3;
+            --bg-panel: #1e1e1e;      /* Панелі трохи світліші */
+            --bg-card: #252525;       /* Картки ще світліші */
+            --bg-hover: #333333;      /* Ховер */
+            --bg-input: #2c2c2c;      /* Інпути */
 
-            --accent: #9d4edd; /* Основний фіолетовий */
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+
+            --accent: #9d4edd;        /* Фіолетовий */
             --accent-hover: #7b2cbf;
 
-            --danger: #e91e63; /* Для видалення */
-            --danger-hover: #c2185b;
+            --danger: #e91e63;
+            --bg-modal: rgba(0, 0, 0, 0.7);
+
+            /* Градієнт тепер плавно переходить у #121212 */
+            --glow-gradient: linear-gradient(180deg, rgba(80, 25, 110, 0.5) 0%, rgba(18, 18, 18, 1) 100%);
         }
+
+        * { box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             height: 100vh;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- Header --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #333;
-            margin-bottom: 20px;
-        }
-        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .logo span { color: var(--accent); }
-        .logout-btn { margin-left: 15px; color: var(--text-main); text-decoration: none; font-weight: 600; }
-        .logout-btn:hover { color: var(--accent); }
-
-        /* --- Layout --- */
-        .main-container {
-            display: grid;
-            grid-template-columns: 250px 1fr 350px;
-            gap: 20px;
-            flex-grow: 1;
-            min-height: 0;
-        }
-
-        .panel {
-            background-color: var(--bg-card);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
+
+            display: grid;
+            grid-template-columns: 260px 1fr 300px;
+            gap: 12px;
         }
 
-        /* --- Scroll Area --- */
-        .scroll-area { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-
-        /* --- Lists --- */
+        a { text-decoration: none; color: inherit; transition: 0.2s; }
         ul { list-style: none; padding: 0; margin: 0; }
-        li { padding: 10px; border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-        li:hover { background-color: var(--bg-hover); }
+        h1, h2, h3, p { margin: 0; }
 
-        /* --- Inputs & Buttons --- */
-        input[type="text"], select {
-            width: 100%; padding: 10px; border-radius: 20px; border: none;
-            background-color: var(--bg-input); color: var(--text-main); margin-bottom: 10px; box-sizing: border-box;
-        }
-        button { padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-primary { background-color: var(--accent); color: white; width: 100%; }
-        .btn-primary:hover { background-color: var(--accent-hover); }
-        .btn-icon { background: transparent; color: var(--text-muted); font-size: 1.1rem; padding: 5px; }
-        .btn-icon:hover { color: var(--text-main); transform: scale(1.1); }
-        .btn-danger { background-color: var(--danger); color: white; width: 100%; margin-top: 10px; }
-        .btn-danger:hover { background-color: var(--danger-hover); }
-
-        /* --- Playlists --- */
-        .playlist-link { text-decoration: none; color: inherit; display: block; width: 100%; }
-        .active-playlist { background-color: rgba(157, 78, 221, 0.2); color: var(--accent); }
-
-        /* --- Admin Badge --- */
-        .admin-badge { background-color: var(--text-main); color: var(--bg-main); padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: 900; }
-
-        /* --- MODAL STYLES --- */
-        .modal-overlay {
-            display: none; /* Hidden by default */
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-modal);
-            z-index: 1000;
-            justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
-        }
-        .modal-content {
-            background-color: var(--bg-card);
-            padding: 30px;
+        /* --- UTILS --- */
+        .panel-box {
+            background-color: var(--bg-panel);
             border-radius: 12px;
-            width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 1px solid #333;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* ================= 1. LEFT SIDEBAR ================= */
+        .sidebar-nav {
+            padding: 20px 12px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            padding: 0 12px;
+            display: flex; align-items: center; gap: 10px;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--accent); font-size: 1.8rem; }
+
+        .nav-label {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+            color: var(--text-secondary); margin: 20px 12px 10px 12px;
+        }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            margin-bottom: 2px;
+        }
+        .menu-item:hover { color: white; background-color: var(--bg-hover); }
+        .menu-item.active { color: white; background-color: var(--bg-hover); }
+        .menu-item .icon { font-size: 1.3rem; width: 24px; text-align: center; }
+
+        .playlist-scroll {
+            overflow-y: auto;
+            flex-grow: 1;
+            margin-top: 5px;
+            padding-right: 5px;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+        .create-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: transparent; border: 1px solid var(--text-secondary);
+            color: var(--text-primary); width: 100%; padding: 10px;
+            border-radius: 30px; cursor: pointer; margin-top: 10px;
+            transition: 0.2s; font-size: 0.9rem; font-weight: 700;
+        }
+        .create-btn:hover { border-color: white; background: rgba(255,255,255,0.05); }
+
+        /* ================= 2. MAIN CONTENT ================= */
+        .main-view {
             position: relative;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { margin: 0; color: var(--text-main); }
-        .close-btn { cursor: pointer; font-size: 1.5rem; color: var(--text-muted); background: none; border: none; padding: 0; }
-        .close-btn:hover { color: var(--text-main); }
 
-        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        /* GLOW EFFECT */
+        .playlist-bg-gradient {
+            position: absolute; top: 0; left: 0; width: 100%; height: 350px;
+            background: var(--glow-gradient);
+            z-index: 0;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .home-bg-gradient {
+            position: absolute; top: 0; left: 0; width: 100%; height: 300px;
+            background: linear-gradient(180deg, #2c2c2c 0%, #121212 100%);
+            z-index: 0;
+        }
+
+        .top-bar {
+            position: sticky; top: 0;
+            padding: 16px 30px;
+            display: flex; justify-content: flex-end; align-items: center;
+            z-index: 10;
+            height: 64px;
+            background: rgba(18, 18, 18, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-chip {
+            background: rgba(0,0,0,0.5); padding: 4px 12px 4px 4px;
+            border-radius: 30px; display: flex; align-items: center; gap: 10px;
+            font-weight: 700; font-size: 0.9rem;
+        }
+        .user-avatar {
+            width: 28px; height: 28px; background: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white;
+        }
+        .logout-link { font-size: 0.85em; color: var(--text-secondary); margin-left: 15px; font-weight: 600; }
+        .logout-link:hover { color: white; }
+
+        .content-area { padding: 20px 30px 40px 30px; position: relative; z-index: 1; overflow-y: auto; height: calc(100% - 64px); }
+
+        /* Playlist Header */
+        .hero-header { display: flex; align-items: flex-end; gap: 25px; margin-bottom: 30px; padding-bottom: 20px; }
+        .hero-cover {
+            width: 190px; height: 190px;
+            background: var(--bg-card);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; color: #555; border-radius: 8px;
+        }
+        .hero-info h1 { font-size: 3.5rem; font-weight: 800; margin: 10px 0; letter-spacing: -1px; line-height: 1; }
+        .hero-meta { font-weight: 500; color: var(--text-secondary); }
+
+        /* Track Rows */
+        .track-list-header {
+            display: grid; grid-template-columns: 40px 1fr 1fr 40px;
+            color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;
+            padding: 0 15px 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;
+        }
+        .track-row {
+            display: grid; grid-template-columns: 40px 1fr 1fr 40px;
+            padding: 10px 15px; border-radius: 6px; align-items: center;
+            color: var(--text-secondary); font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .track-row:hover { background-color: rgba(255,255,255,0.08); color: white; }
+        .track-title { color: white; font-weight: 500; font-size: 1rem; }
+
+        /* Grid Cards (Home) */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+        .music-card {
+            background: var(--bg-card); padding: 15px; border-radius: 8px;
+            transition: 0.3s; cursor: pointer; position: relative;
+        }
+        .music-card:hover { background: var(--bg-hover); transform: translateY(-5px); }
+        .card-img { width: 100%; aspect-ratio: 1; background: #333; border-radius: 4px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #555; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .play-btn-overlay {
+            position: absolute; bottom: 20px; right: 20px;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: var(--accent); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            opacity: 0; transform: translateY(10px); transition: 0.3s; border: none; cursor: pointer;
+        }
+        .music-card:hover .play-btn-overlay { opacity: 1; transform: translateY(0); }
+        .play-btn-overlay:hover { transform: scale(1.05) !important; background: var(--accent-hover); }
+
+        /* ================= 3. RIGHT SIDEBAR ================= */
+        .sidebar-right {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        input[type="text"], select {
+            width: 100%; padding: 12px 16px; border-radius: 30px; border: none;
+            background-color: var(--bg-input); color: white; font-size: 0.9rem;
+            margin-bottom: 15px; transition: 0.2s;
+        }
+        input[type="text"]:focus { background-color: #4a4a4a; outline: none; }
+
+        .search-result-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-radius: 6px;
+        }
+        .search-result-item:hover { background-color: var(--bg-hover); }
+
+        .btn-small { background: transparent; border: 1px solid #555; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: 0.2s; }
+        .btn-small:hover { border-color: white; transform: scale(1.1); }
+        .btn-delete { color: var(--text-secondary); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+        .btn-delete:hover { color: white; }
+
+        .btn-danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); width: 100%; margin-top: 10px; padding: 8px; border-radius: 20px; cursor: pointer; font-weight: 600; }
+        .btn-danger:hover { background-color: var(--danger); color: white; }
+
+        .primary-btn { background-color: var(--text-primary); color: black; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 700; cursor: pointer; width: 100%; font-size: 0.95rem; }
+        .primary-btn:hover { transform: scale(1.02); }
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-modal); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .modal { background: #242424; padding: 30px; border-radius: 12px; width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid #444; }
+        .modal h3 { margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; }
+        .modal label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--text-secondary); }
+        .modal input, .modal select { width: 100%; margin-bottom: 20px; background: #121212; border: 1px solid #444; color: white; padding: 12px; border-radius: 6px; }
+        .modal input:focus { border-color: var(--accent); outline: none;}
+        .close-btn { float: right; background: none; border: none; color: var(--text-secondary); font-size: 1.8rem; cursor: pointer; line-height: 1; }
+        .close-btn:hover { color: white; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="logo"><span>🟣</span> Music Platform</div>
-    <div class="user-info">
-        Logged in as <strong>{user.username}</strong>
-        {#if isAdmin}<span class="admin-badge">ADMIN</span>{/if}
-        <a href="/logout" class="logout-btn">Logout</a>
+<aside class="panel-box sidebar-nav">
+    <div class="logo"><span>🟣</span> MusicFlow</div>
+
+    <div class="nav-section">
+        <a href="/" class="menu-item {#if !selectedPlaylist}active{/if}">
+            <span class="icon">🏠</span> Home
+        </a>
     </div>
-</div>
 
-<div class="main-container">
+    <div class="nav-label">YOUR LIBRARY</div>
 
-    <div class="panel">
-        <h2>Your Library</h2>
-        <form action="/playlist/create" method="POST" style="margin-bottom: 15px;">
-            <div style="display: flex; gap: 5px;">
-                <input type="text" name="name" placeholder="New Playlist..." required style="margin-bottom: 0;">
-                <button type="submit" class="btn-icon" title="Create">+</button>
-            </div>
-        </form>
-        <div class="scroll-area">
-            <ul>
-                {#for p in playlists}
-                    <li class="{#if selectedPlaylist && selectedPlaylist.id == p.id}active-playlist{/if}">
-                        <a href="/?playlistId={p.id}" class="playlist-link">
-                            <strong>{p.name}</strong><br>
-                            <span style="font-size: 0.8em; opacity: 0.7;">{p.trackIds.size} tracks</span>
-                        </a>
-                    </li>
-                {/for}
-            </ul>
+    <div class="playlist-scroll">
+        {#for p in playlists}
+            <a href="/?playlistId={p.id}" class="menu-item {#if selectedPlaylist && selectedPlaylist.id == p.id}active{/if}">
+                <span class="icon">🎵</span>
+                <span style="flex-grow:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{p.name}</span>
+                {#if p.trackIds.size > 0}<span style="font-size:0.8em; opacity:0.6">{p.trackIds.size}</span>{/if}
+            </a>
+        {/for}
+    </div>
+
+    <button onclick="document.getElementById('createPlaylistModal').style.display='flex'" class="create-btn">
+        <span style="font-size:1.2rem; line-height:0">+</span> Create Playlist
+    </button>
+</aside>
+
+
+<main class="panel-box main-view">
+
+    {#if selectedPlaylist}
+        <div class="playlist-bg-gradient"></div>
+    {#else}
+        <div class="home-bg-gradient"></div>
+    {/if}
+
+    <div class="top-bar">
+        <div class="user-chip">
+            <div class="user-avatar">{user.username.substring(0,1).toUpperCase()}</div>
+            <span>{user.username}</span>
+            {#if isAdmin}<span style="color: gold; font-size: 0.8em;">★</span>{/if}
         </div>
+        <a href="/logout" class="logout-link">Logout</a>
     </div>
 
-    <div class="panel" style="background: linear-gradient(180deg, #251b2e 0%, #121212 100%);">
-        {#if selectedPlaylist}
-            <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 20px;">
-                <div>
-                    <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Playlist</span>
-                    <h1 style="margin: 5px 0; font-size: 3rem; font-weight: 800;">{selectedPlaylist.name}</h1>
-                    <span style="color: #b3b3b3;">Tracks: {selectedPlaylist.tracks.size}</span>
-                </div>
-                <form action="/playlist/delete" method="POST" onsubmit="return confirm('Delete this playlist?');">
-                    <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
-                    <button type="submit" class="btn-icon btn-delete" title="Delete Playlist">✕</button>
-                </form>
+    <div class="content-area">
+
+        {#if error == 'DuplicateTrack'}
+            <div style="background: #5c1a1a; color: #ff9999; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-weight: 600; border: 1px solid #ff4d4d; display: flex; align-items: center; gap: 10px;">
+                <span>⚠️</span> This song is already in your playlist.
             </div>
-            <div class="scroll-area">
-                <ul>
-                    {#for t in selectedPlaylist.tracks}
-                        <li>
-                            <div><strong>{t.title}</strong> <span style="color:#888">{t.artist}</span></div>
-                            <form action="/playlist/remove-track" method="POST" style="margin:0;">
+        {/if}
+
+        {#if selectedPlaylist}
+            <div class="hero-header">
+                <div class="hero-cover">♫</div>
+                <div class="hero-info">
+                    <div style="text-transform:uppercase; font-weight:700; font-size: 0.8rem; margin-bottom: 5px;">Playlist</div>
+                    <h1>{selectedPlaylist.name}</h1>
+                    <div class="hero-meta">
+                        {user.username} • {selectedPlaylist.tracks.size} songs
+                    </div>
+
+                    <form action="/playlist/delete" method="POST" style="margin-top: 20px;" onsubmit="return confirm('Delete this playlist?');">
+                        <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
+                        <button type="submit" class="btn-danger" style="width: auto; padding: 8px 24px; border: 1px solid rgba(255,255,255,0.3); color: white; margin-top:0;">Delete</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="track-list-header">
+                <div style="text-align: center">#</div>
+                <div>Title</div>
+                <div>Album</div>
+                <div style="text-align: right">Action</div>
+            </div>
+
+            {#for t in selectedPlaylist.tracks}
+                {#if t}
+                    <div class="track-row">
+                        <div style="text-align: center; color: var(--accent); font-size: 0.8em;">▶</div>
+                        <div>
+                            <div class="track-title">{t.title}</div>
+                            <div class="track-artist">{t.artist}</div>
+                        </div>
+                        <div>{t.album}</div>
+                        <div style="text-align: right; display:flex; justify-content:flex-end;">
+                            <form action="/playlist/remove-track" method="POST" style="margin:0">
                                 <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
                                 <input type="hidden" name="trackId" value="{t.id}">
-                                <button type="submit" class="btn-icon">–</button>
+                                <button type="submit" class="btn-delete" title="Remove">✕</button>
                             </form>
-                        </li>
-                    {/for}
-                </ul>
-            </div>
+                        </div>
+                    </div>
+                {/if}
+            {#else}
+                <div style="text-align:center; padding:80px; color:var(--text-secondary);">
+                    <p style="font-size: 3rem; margin-bottom: 10px;">♪</p>
+                    <h3>It's empty here</h3>
+                    <p>Find songs in the catalog on the right to add them.</p>
+                </div>
+            {/for}
+
         {#else}
-            <div style="margin: auto; text-align: center; color: #555;">
-                <h2>Select a playlist</h2>
-            </div>
+            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 25px;">Good evening</h2>
+
+            <h3 style="margin-bottom: 15px; color: white;">Made for {user.username}</h3>
+
+            {#if recommendations}
+                <div class="grid-cards">
+                    {#for t in recommendations}
+                        <div class="music-card">
+                            <div class="card-img">♪</div>
+                            <div class="card-title">{t.title}</div>
+                            <div class="card-sub">{t.artist}</div>
+                            <button class="play-btn-overlay" onclick="openQuickAdd('{t.id}', '{t.title}')">+</button>
+                        </div>
+                    {/for}
+                </div>
+            {#else}
+                <p style="color: var(--text-secondary)">No recommendations yet.</p>
+            {/if}
+        {/if}
+    </div>
+</main>
+
+
+<aside class="panel-box sidebar-right">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin:0; font-size:1.2rem;">Catalog</h3>
+        {#if isAdmin}
+            <button onclick="document.getElementById('addTrackModal').style.display='flex'"
+                    style="background: #333; border:none; color:white; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center;">+</button>
         {/if}
     </div>
 
-    <div class="panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="margin:0;">Catalog</h2>
-            {#if isAdmin}
-                <button onclick="openAddModal()" class="btn-primary" style="width: auto; font-size: 0.8em;">+ Add Track</button>
-            {/if}
-        </div>
+    <form action="/" method="GET">
+        {#if selectedPlaylist}<input type="hidden" name="playlistId" value="{selectedPlaylist.id}">{/if}
+        <input type="text" name="search" placeholder="Search artists, songs..." autocomplete="off">
+    </form>
 
-        <form action="/" method="GET" style="margin-bottom: 20px;">
-            {#if selectedPlaylist}<input type="hidden" name="playlistId" value="{selectedPlaylist.id}">{/if}
-            <input type="text" name="search" placeholder="Search artists..." autocomplete="off">
+    {#if tracks}
+        <div style="margin-bottom: 15px; font-size: 0.8rem; color: var(--text-secondary); font-weight:700; letter-spacing:1px;">RESULTS</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            {#for t in tracks}
+                <div class="search-result-item">
+                    <div style="overflow: hidden;">
+                        <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white;">{t.title}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">{t.artist}</div>
+                    </div>
+
+                    <div style="display: flex; gap: 5px;">
+                        <form action="/playlist/add-track" method="POST" style="margin:0">
+                            <input type="hidden" name="trackId" value="{t.id}">
+                            {#if selectedPlaylist}
+                                <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
+                                <button type="submit" class="btn-small">+</button>
+                            {#else}
+                                <button type="button" class="btn-small" onclick="openQuickAdd('{t.id}', '{t.title}')">+</button>
+                            {/if}
+                        </form>
+
+                        {#if isAdmin}
+                            <button onclick="openEditModal('{t.id}', '{t.title}', '{t.artist}', '{t.album}')"
+                                    class="btn-small" style="border-color: #444; color: #aaa;">✎</button>
+                        {/if}
+                    </div>
+                </div>
+            {/for}
+        </div>
+    {/if}
+</aside>
+
+<div id="quickAddModal" class="modal-overlay" onclick="if(event.target == this) this.style.display='none'">
+    <div class="modal">
+        <button onclick="document.getElementById('quickAddModal').style.display='none'" class="close-btn">&times;</button>
+        <h3>Add to Playlist</h3>
+        <p style="color: #aaa; margin-bottom: 20px;">Add "<strong><span id="qaTrackTitle"></span></strong>" to:</p>
+
+        <form action="/playlist/add-track" method="POST">
+            <input type="hidden" name="trackId" id="qaTrackId">
+            <select name="playlistId" required>
+                <option value="" disabled selected>Select...</option>
+                {#for p in playlists}
+                    <option value="{p.id}">{p.name}</option>
+                {/for}
+            </select>
+            <button type="submit" class="primary-btn">Add</button>
         </form>
+    </div>
+</div>
 
-        <div class="scroll-area">
-            {#if tracks}
-                <ul>
-                    {#for t in tracks}
-                        <li>
-                            <div>
-                                <strong>{t.title}</strong><br>
-                                <span style="color:#888">{t.artist}</span>
-                            </div>
-                            <div style="display: flex; gap: 5px; align-items: center;">
-                                <form action="/playlist/add-track" method="POST" style="margin:0; display: flex;">
-                                    <input type="hidden" name="trackId" value="{t.id}">
-                                    {#if selectedPlaylist}
-                                        <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
-                                        <button type="submit" class="btn-icon" title="Add to playlist">+</button>
-                                    {#else}
-                                        <select name="playlistId" required style="width: 80px; padding: 5px; font-size: 0.8em; margin:0;">
-                                            <option value="" disabled selected>Add...</option>
-                                            {#for p in playlists}<option value="{p.id}">{p.name}</option>{/for}
-                                        </select>
-                                        <button type="submit" class="btn-icon">✓</button>
-                                    {/if}
-                                </form>
-
-                                {#if isAdmin}
-                                    <button onclick="openEditModal('{t.id}', '{t.title}', '{t.artist}', '{t.album}')"
-                                            class="btn-icon" title="Edit Track">✎</button>
-                                {/if}
-                            </div>
-                        </li>
-                    {/for}
-                </ul>
-            {#else}
-                <div style="text-align: center; color: #555; padding: 20px;">Use search to find songs.</div>
-            {/if}
-        </div>
+<div id="createPlaylistModal" class="modal-overlay" onclick="if(event.target == this) this.style.display='none'">
+    <div class="modal">
+        <button onclick="document.getElementById('createPlaylistModal').style.display='none'" class="close-btn">&times;</button>
+        <h3>Create Playlist</h3>
+        <form action="/playlist/create" method="POST">
+            <label>Name</label>
+            <input type="text" name="name" placeholder="My Playlist" required autofocus>
+            <button type="submit" class="primary-btn">Create</button>
+        </form>
     </div>
 </div>
 
 {#if isAdmin}
     <div id="addTrackModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Track</h2>
-                <button onclick="closeModal('addTrackModal')" class="close-btn">&times;</button>
-            </div>
+        <div class="modal">
+            <button onclick="document.getElementById('addTrackModal').style.display='none'" class="close-btn">&times;</button>
+            <h3>Add New Track</h3>
             <form action="/admin/track/create" method="POST">
-                <label>Title</label>
-                <input type="text" name="title" required>
-                <label>Artist</label>
-                <input type="text" name="artist" required>
-                <label>Album</label>
-                <input type="text" name="album" required>
-                <button type="submit" class="btn-primary" style="margin-top: 10px;">Create Track</button>
+                <label>Title</label> <input type="text" name="title" required>
+                <label>Artist</label> <input type="text" name="artist" required>
+                <label>Album</label> <input type="text" name="album" required>
+                <button type="submit" class="primary-btn" style="margin-top: 10px;">Create</button>
             </form>
         </div>
     </div>
 
     <div id="editTrackModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Track</h2>
-                <button onclick="closeModal('editTrackModal')" class="close-btn">&times;</button>
-            </div>
-
+        <div class="modal">
+            <button onclick="document.getElementById('editTrackModal').style.display='none'" class="close-btn">&times;</button>
+            <h3>Edit Track</h3>
             <form action="/admin/track/update" method="POST">
                 <input type="hidden" id="editTrackId" name="trackId">
-
-                <label>Title</label>
-                <input type="text" id="editTitle" name="title" required>
-                <label>Artist</label>
-                <input type="text" id="editArtist" name="artist" required>
-                <label>Album</label>
-                <input type="text" id="editAlbum" name="album" required>
-
-                <button type="submit" class="btn-primary" style="margin-top: 10px;">Save Changes</button>
+                <label>Title</label> <input type="text" id="editTitle" name="title" required>
+                <label>Artist</label> <input type="text" id="editArtist" name="artist" required>
+                <label>Album</label> <input type="text" id="editAlbum" name="album" required>
+                <button type="submit" class="primary-btn" style="margin-bottom: 15px;">Save Changes</button>
             </form>
-
-            <form action="/admin/track/delete" method="POST" onsubmit="return confirm('Permanently delete this track?');">
+            <form action="/admin/track/delete" method="POST" onsubmit="return confirm('Permanently delete?');">
                 <input type="hidden" id="deleteTrackId" name="trackId">
-                <button type="submit" class="btn-danger">Delete Track</button>
+                <button type="submit" class="btn-danger" style="border: 1px solid var(--danger);">Delete from Database</button>
             </form>
         </div>
     </div>
 {/if}
 
 <script>
-    // Відкриття модалки додавання
-    function openAddModal() {
-        document.getElementById('addTrackModal').style.display = 'flex';
+    function openQuickAdd(id, title) {
+        document.getElementById('qaTrackId').value = id;
+        document.getElementById('qaTrackTitle').innerText = title;
+        document.getElementById('quickAddModal').style.display = 'flex';
     }
-
-    // Відкриття модалки редагування (з заповненням даних)
     function openEditModal(id, title, artist, album) {
-        // Заповнюємо поля форми редагування
         document.getElementById('editTrackId').value = id;
+        document.getElementById('deleteTrackId').value = id;
         document.getElementById('editTitle').value = title;
         document.getElementById('editArtist').value = artist;
         document.getElementById('editAlbum').value = album;
-
-        // Заповнюємо ID для форми видалення
-        document.getElementById('deleteTrackId').value = id;
-
-        // Показуємо вікно
         document.getElementById('editTrackModal').style.display = 'flex';
     }
-
-    // Закриття модалок
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    // Закриття при кліку за межами вікна
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal-overlay')) {
-            event.target.style.display = 'none';
-        }
-    }
 </script>
-
 </body>
 </html>

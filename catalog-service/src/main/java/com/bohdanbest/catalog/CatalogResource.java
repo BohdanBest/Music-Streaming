@@ -54,6 +54,12 @@ public class CatalogResource {
         return entity;
     }
 
+    @GET
+    @Path("/recommendations")
+    public List<Track> getRecommendations() {
+        return Track.findAll().list();
+    }
+
     @DELETE
     @Path("/{id}")
     @Transactional

@@ -18,6 +18,8 @@ import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("/")
 public class HomeResource {
@@ -33,28 +35,50 @@ public class HomeResource {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance get(@QueryParam("search") String search,
-                                @QueryParam("playlistId") Long playlistId, // Вибраний плейлист
-                                @QueryParam("error") String error) {       // Повідомлення про помилку
+                                @QueryParam("playlistId") Long playlistId,
+                                @QueryParam("error") String error) {
 
         boolean isAdmin = identity.getRoles().contains("admin") || identity.getPrincipal().getName().equals("admin");
         String searchQuery = (search == null || search.isBlank()) ? "" : search;
 
-        // Завантажуємо деталі плейлиста, якщо він обраний
+        // 1. Отримуємо деталі вибраного плейлиста (якщо є ID)
         PlaylistDetailDto selectedPlaylist = null;
         if (playlistId != null) {
             try {
                 selectedPlaylist = playlistClient.getById(playlistId);
             } catch (Exception e) {
-                // Ігноруємо, якщо не знайдено
+                // ігноруємо помилку, якщо плейлист не знайдено
             }
         }
 
+        List<TrackDto> recommendations = null;
+        if (playlistId == null && searchQuery.isEmpty()) {
+            try {
+                recommendations = catalogClient.getRecommendations();
+            } catch (Exception e) {
+                // Якщо catalog-service не відповідає або метод ще не реалізований
+                recommendations = new ArrayList<>();
+            }
+        }
+
+        // 3. Шукаємо треки (якщо ввели запит)
+        List<TrackDto> tracks = null;
+        if (!searchQuery.isEmpty()) {
+            try {
+                tracks = catalogClient.search(searchQuery);
+            } catch (Exception e) {
+                tracks = new ArrayList<>();
+            }
+        }
+
+        // 4. Повертаємо ВСІ дані в шаблон
         return index.data("user", userClient.getMe())
                 .data("playlists", playlistClient.getAll())
-                .data("tracks", search != null ? catalogClient.search(searchQuery) : null)
+                .data("tracks", tracks)
+                .data("recommendations", recommendations) // <--- ОСЬ ЦЕ ВАЖЛИВО!
                 .data("isAdmin", isAdmin)
-                .data("selectedPlaylist", selectedPlaylist) // Передаємо в шаблон
-                .data("error", error);                      // Передаємо помилку
+                .data("selectedPlaylist", selectedPlaylist)
+                .data("error", error);
     }
     // --- Створення плейлиста ---
     @POST
