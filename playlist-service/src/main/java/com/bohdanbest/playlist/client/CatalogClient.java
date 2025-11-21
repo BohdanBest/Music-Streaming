@@ -12,6 +12,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @AccessToken
 @Path("/tracks")
 public interface CatalogClient {
+
     @GET
     @Path("/{id}")
     Object getTrack(@PathParam("id") Long id);

@@ -11,12 +11,17 @@ import java.util.List;
 @Entity
 public class Playlist extends PanacheEntity {
     public String name;
-    public String owner; // Зберігаємо логін юзера (наприклад, "alice")
+    public String owner;
 
     @ElementCollection(fetch = FetchType.EAGER)
     public List<Long> trackIds = new ArrayList<>();
 
+    // Метод Active Record для пошуку
     public static List<Playlist> findByOwner(String owner) {
         return list("owner", owner);
+    }
+
+    public static class TrackIdRequest {
+        public Long trackId;
     }
 }

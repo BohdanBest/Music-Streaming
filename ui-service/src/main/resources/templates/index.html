@@ -2,42 +2,328 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Music App</title>
-    <style>body { font-family: sans-serif; padding: 20px; }</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Platform</title>
+    <style>
+        :root {
+            /* Палітра кольорів (Dark + Purple) */
+            --bg-main: #121212;
+            --bg-card: #181818;
+            --bg-hover: #282828;
+            --bg-input: #3e3e3e;
+            --bg-modal: rgba(0, 0, 0, 0.7);
+
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+
+            --accent: #9d4edd; /* Основний фіолетовий */
+            --accent-hover: #7b2cbf;
+
+            --danger: #e91e63; /* Для видалення */
+            --danger-hover: #c2185b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: var(--accent); }
+        .logout-btn { margin-left: 15px; color: var(--text-main); text-decoration: none; font-weight: 600; }
+        .logout-btn:hover { color: var(--accent); }
+
+        /* --- Layout --- */
+        .main-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 350px;
+            gap: 20px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .panel {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Scroll Area --- */
+        .scroll-area { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        /* --- Lists --- */
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { padding: 10px; border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+        li:hover { background-color: var(--bg-hover); }
+
+        /* --- Inputs & Buttons --- */
+        input[type="text"], select {
+            width: 100%; padding: 10px; border-radius: 20px; border: none;
+            background-color: var(--bg-input); color: var(--text-main); margin-bottom: 10px; box-sizing: border-box;
+        }
+        button { padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background-color: var(--accent); color: white; width: 100%; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        .btn-icon { background: transparent; color: var(--text-muted); font-size: 1.1rem; padding: 5px; }
+        .btn-icon:hover { color: var(--text-main); transform: scale(1.1); }
+        .btn-danger { background-color: var(--danger); color: white; width: 100%; margin-top: 10px; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+
+        /* --- Playlists --- */
+        .playlist-link { text-decoration: none; color: inherit; display: block; width: 100%; }
+        .active-playlist { background-color: rgba(157, 78, 221, 0.2); color: var(--accent); }
+
+        /* --- Admin Badge --- */
+        .admin-badge { background-color: var(--text-main); color: var(--bg-main); padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: 900; }
+
+        /* --- MODAL STYLES --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-modal);
+            z-index: 1000;
+            justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            position: relative;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; color: var(--text-main); }
+        .close-btn { cursor: pointer; font-size: 1.5rem; color: var(--text-muted); background: none; border: none; padding: 0; }
+        .close-btn:hover { color: var(--text-main); }
+
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    </style>
 </head>
 <body>
-<div style="float: right"><a href="/logout">Logout</a></div>
-<h1>Music Streaming 🎵</h1>
 
-<div style="display: flex; gap: 50px;">
-    <div>
-        <h2>My Playlists</h2>
-        <ul>
-            {#for p in playlists}
-                <li><strong>{p.name}</strong> (Tracks: {p.trackIds.size})</li>
-            {/for}
-        </ul>
-        <form action="/create-playlist" method="POST">
-            <input type="text" name="name" placeholder="New Playlist Name" required>
-            <button type="submit">Create</button>
-        </form>
-    </div>
-
-    <div>
-        <h2>Find Music</h2>
-        <form action="/" method="GET">
-            <input type="text" name="search" placeholder="Artist name (e.g. Queen)">
-            <button type="submit">Search</button>
-        </form>
-
-        {#if tracks}
-            <ul>
-                {#for t in tracks}
-                    <li>{t.artist} - {t.title}</li>
-                {/for}
-            </ul>
-        {/if}
+<div class="header">
+    <div class="logo"><span>🟣</span> Music Platform</div>
+    <div class="user-info">
+        Logged in as <strong>{user.username}</strong>
+        {#if isAdmin}<span class="admin-badge">ADMIN</span>{/if}
+        <a href="/logout" class="logout-btn">Logout</a>
     </div>
 </div>
+
+<div class="main-container">
+
+    <div class="panel">
+        <h2>Your Library</h2>
+        <form action="/playlist/create" method="POST" style="margin-bottom: 15px;">
+            <div style="display: flex; gap: 5px;">
+                <input type="text" name="name" placeholder="New Playlist..." required style="margin-bottom: 0;">
+                <button type="submit" class="btn-icon" title="Create">+</button>
+            </div>
+        </form>
+        <div class="scroll-area">
+            <ul>
+                {#for p in playlists}
+                    <li class="{#if selectedPlaylist && selectedPlaylist.id == p.id}active-playlist{/if}">
+                        <a href="/?playlistId={p.id}" class="playlist-link">
+                            <strong>{p.name}</strong><br>
+                            <span style="font-size: 0.8em; opacity: 0.7;">{p.trackIds.size} tracks</span>
+                        </a>
+                    </li>
+                {/for}
+            </ul>
+        </div>
+    </div>
+
+    <div class="panel" style="background: linear-gradient(180deg, #251b2e 0%, #121212 100%);">
+        {#if selectedPlaylist}
+            <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 20px;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Playlist</span>
+                    <h1 style="margin: 5px 0; font-size: 3rem; font-weight: 800;">{selectedPlaylist.name}</h1>
+                    <span style="color: #b3b3b3;">Tracks: {selectedPlaylist.tracks.size}</span>
+                </div>
+                <form action="/playlist/delete" method="POST" onsubmit="return confirm('Delete this playlist?');">
+                    <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
+                    <button type="submit" class="btn-icon btn-delete" title="Delete Playlist">✕</button>
+                </form>
+            </div>
+            <div class="scroll-area">
+                <ul>
+                    {#for t in selectedPlaylist.tracks}
+                        <li>
+                            <div><strong>{t.title}</strong> <span style="color:#888">{t.artist}</span></div>
+                            <form action="/playlist/remove-track" method="POST" style="margin:0;">
+                                <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
+                                <input type="hidden" name="trackId" value="{t.id}">
+                                <button type="submit" class="btn-icon">–</button>
+                            </form>
+                        </li>
+                    {/for}
+                </ul>
+            </div>
+        {#else}
+            <div style="margin: auto; text-align: center; color: #555;">
+                <h2>Select a playlist</h2>
+            </div>
+        {/if}
+    </div>
+
+    <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin:0;">Catalog</h2>
+            {#if isAdmin}
+                <button onclick="openAddModal()" class="btn-primary" style="width: auto; font-size: 0.8em;">+ Add Track</button>
+            {/if}
+        </div>
+
+        <form action="/" method="GET" style="margin-bottom: 20px;">
+            {#if selectedPlaylist}<input type="hidden" name="playlistId" value="{selectedPlaylist.id}">{/if}
+            <input type="text" name="search" placeholder="Search artists..." autocomplete="off">
+        </form>
+
+        <div class="scroll-area">
+            {#if tracks}
+                <ul>
+                    {#for t in tracks}
+                        <li>
+                            <div>
+                                <strong>{t.title}</strong><br>
+                                <span style="color:#888">{t.artist}</span>
+                            </div>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <form action="/playlist/add-track" method="POST" style="margin:0; display: flex;">
+                                    <input type="hidden" name="trackId" value="{t.id}">
+                                    {#if selectedPlaylist}
+                                        <input type="hidden" name="playlistId" value="{selectedPlaylist.id}">
+                                        <button type="submit" class="btn-icon" title="Add to playlist">+</button>
+                                    {#else}
+                                        <select name="playlistId" required style="width: 80px; padding: 5px; font-size: 0.8em; margin:0;">
+                                            <option value="" disabled selected>Add...</option>
+                                            {#for p in playlists}<option value="{p.id}">{p.name}</option>{/for}
+                                        </select>
+                                        <button type="submit" class="btn-icon">✓</button>
+                                    {/if}
+                                </form>
+
+                                {#if isAdmin}
+                                    <button onclick="openEditModal('{t.id}', '{t.title}', '{t.artist}', '{t.album}')"
+                                            class="btn-icon" title="Edit Track">✎</button>
+                                {/if}
+                            </div>
+                        </li>
+                    {/for}
+                </ul>
+            {#else}
+                <div style="text-align: center; color: #555; padding: 20px;">Use search to find songs.</div>
+            {/if}
+        </div>
+    </div>
+</div>
+
+{#if isAdmin}
+    <div id="addTrackModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Track</h2>
+                <button onclick="closeModal('addTrackModal')" class="close-btn">&times;</button>
+            </div>
+            <form action="/admin/track/create" method="POST">
+                <label>Title</label>
+                <input type="text" name="title" required>
+                <label>Artist</label>
+                <input type="text" name="artist" required>
+                <label>Album</label>
+                <input type="text" name="album" required>
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">Create Track</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editTrackModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Track</h2>
+                <button onclick="closeModal('editTrackModal')" class="close-btn">&times;</button>
+            </div>
+
+            <form action="/admin/track/update" method="POST">
+                <input type="hidden" id="editTrackId" name="trackId">
+
+                <label>Title</label>
+                <input type="text" id="editTitle" name="title" required>
+                <label>Artist</label>
+                <input type="text" id="editArtist" name="artist" required>
+                <label>Album</label>
+                <input type="text" id="editAlbum" name="album" required>
+
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">Save Changes</button>
+            </form>
+
+            <form action="/admin/track/delete" method="POST" onsubmit="return confirm('Permanently delete this track?');">
+                <input type="hidden" id="deleteTrackId" name="trackId">
+                <button type="submit" class="btn-danger">Delete Track</button>
+            </form>
+        </div>
+    </div>
+{/if}
+
+<script>
+    // Відкриття модалки додавання
+    function openAddModal() {
+        document.getElementById('addTrackModal').style.display = 'flex';
+    }
+
+    // Відкриття модалки редагування (з заповненням даних)
+    function openEditModal(id, title, artist, album) {
+        // Заповнюємо поля форми редагування
+        document.getElementById('editTrackId').value = id;
+        document.getElementById('editTitle').value = title;
+        document.getElementById('editArtist').value = artist;
+        document.getElementById('editAlbum').value = album;
+
+        // Заповнюємо ID для форми видалення
+        document.getElementById('deleteTrackId').value = id;
+
+        // Показуємо вікно
+        document.getElementById('editTrackModal').style.display = 'flex';
+    }
+
+    // Закриття модалок
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Закриття при кліку за межами вікна
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.style.display = 'none';
+        }
+    }
+</script>
+
 </body>
 </html>
