@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  # --- KEYCLOAK ---
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.0
     container_name: music-keycloak
@@ -34,7 +34,7 @@ services:
     networks:
       - music-net
 
-  # --- CATALOG SERVICE DB ---
+
   catalog-db:
     image: postgres:16
     container_name: music-catalog-db
@@ -47,7 +47,7 @@ services:
     networks:
       - music-net
 
-  # --- PLAYLIST SERVICE DB ---
+
   playlist-db:
     image: postgres:16
     container_name: music-playlist-db
@@ -60,7 +60,27 @@ services:
     networks:
       - music-net
 
-  # --- USER SERVICE DB (НОВЕ) ---
+  redpanda:
+    image: docker.io/redpandadata/redpanda:v23.1.2
+    container_name: music-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --overprovisioned
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr localhost:8082
+    ports:
+      - "9092:9092"
+    networks:
+      - music-net
+
   user-db:
     image: postgres:16
     container_name: music-user-db
@@ -73,7 +93,7 @@ services:
     networks:
       - music-net
 
-# --- ВАЖЛИВО: ВИЗНАЧЕННЯ МЕРЕЖІ ---
+
 networks:
   music-net:
     driver: bridge
