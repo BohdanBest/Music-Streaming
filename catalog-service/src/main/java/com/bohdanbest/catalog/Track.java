@@ -9,7 +9,6 @@ public class Track extends PanacheEntity {
     public String artist;
     public String album;
 
-    // Метод для пошуку
     public static java.util.List<Track> findByArtist(String artist) {
         return list("LOWER(artist) LIKE LOWER(?1)", "%" + artist + "%");
     }

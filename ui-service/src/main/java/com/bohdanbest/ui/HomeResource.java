@@ -11,7 +11,6 @@ import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import io.quarkus.logging.Log;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
@@ -25,7 +24,7 @@ import java.util.List;
 public class HomeResource {
 
     @Inject Template index;
-    @Inject SecurityIdentity identity; // Для перевірки ролей
+    @Inject SecurityIdentity identity;
 
     @Inject @RestClient
     UserClient userClient;
@@ -41,13 +40,11 @@ public class HomeResource {
         boolean isAdmin = identity.getRoles().contains("admin") || identity.getPrincipal().getName().equals("admin");
         String searchQuery = (search == null || search.isBlank()) ? "" : search;
 
-        // 1. Отримуємо деталі вибраного плейлиста (якщо є ID)
         PlaylistDetailDto selectedPlaylist = null;
         if (playlistId != null) {
             try {
                 selectedPlaylist = playlistClient.getById(playlistId);
             } catch (Exception e) {
-                // ігноруємо помилку, якщо плейлист не знайдено
             }
         }
 
@@ -56,12 +53,10 @@ public class HomeResource {
             try {
                 recommendations = catalogClient.getRecommendations();
             } catch (Exception e) {
-                // Якщо catalog-service не відповідає або метод ще не реалізований
                 recommendations = new ArrayList<>();
             }
         }
 
-        // 3. Шукаємо треки (якщо ввели запит)
         List<TrackDto> tracks = null;
         if (!searchQuery.isEmpty()) {
             try {
@@ -71,42 +66,36 @@ public class HomeResource {
             }
         }
 
-        // 4. Повертаємо ВСІ дані в шаблон
         return index.data("user", userClient.getMe())
                 .data("playlists", playlistClient.getAll())
                 .data("tracks", tracks)
-                .data("recommendations", recommendations) // <--- ОСЬ ЦЕ ВАЖЛИВО!
+                .data("recommendations", recommendations)
                 .data("isAdmin", isAdmin)
                 .data("selectedPlaylist", selectedPlaylist)
                 .data("error", error);
     }
-    // --- Створення плейлиста ---
     @POST
     @Path("/playlist/create")
     public RestResponse<Object> createPlaylist(@FormParam("name") String name) {
         playlistClient.create(new PlaylistDto(name));
-        return RestResponse.seeOther(URI.create("/")); // Перезавантаження сторінки
+        return RestResponse.seeOther(URI.create("/"));
     }
 
-    // --- Додавання треку в плейлист (ЮЗЕР) ---
     @POST
     @Path("/playlist/add-track")
     public RestResponse<Object> addTrackToPlaylist(@FormParam("playlistId") Long playlistId,
                                                    @FormParam("trackId") Long trackId) {
         try {
             playlistClient.addTrack(playlistId, trackId);
-            // Успіх: повертаємося на сторінку цього плейлиста
             return RestResponse.seeOther(URI.create("/?playlistId=" + playlistId));
         } catch (ClientWebApplicationException e) {
             if (e.getResponse().getStatus() == 409) {
-                // Дублікат: повертаємося з помилкою
                 return RestResponse.seeOther(URI.create("/?playlistId=" + playlistId + "&error=DuplicateTrack"));
             }
             throw e;
         }
     }
 
-    // --- Додавання нового треку в БД (АДМІН) ---
     @POST
     @Path("/admin/track/create")
     public RestResponse<Object> createTrack(@FormParam("title") String title,
@@ -132,16 +121,13 @@ public class HomeResource {
     public RestResponse<Object> removeTrackFromPlaylist(@FormParam("playlistId") Long playlistId,
                                                         @FormParam("trackId") Long trackId) {
         playlistClient.removeTrack(playlistId, trackId);
-        // Залишаємося на сторінці того ж плейлиста
         return RestResponse.seeOther(URI.create("/?playlistId=" + playlistId));
     }
 
-    // --- Видалення плейлиста ---
     @POST
     @Path("/playlist/delete")
     public RestResponse<Object> deletePlaylist(@FormParam("playlistId") Long playlistId) {
         playlistClient.delete(playlistId);
-        // Повертаємося на головну (скидаємо вибір плейлиста)
         return RestResponse.seeOther(URI.create("/"));
     }
 

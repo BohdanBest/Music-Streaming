@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "users") // "user" - зарезервоване слово в SQL, краще "users"
+@Table(name = "users")
 public class User {
 
     @Id

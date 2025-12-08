@@ -1,4 +1,9 @@
 package com.bohdanbest.user.event;
 
-public class TrackAddedEventDeserializer {
+import io.quarkus.kafka.client.serialization.ObjectMapperDeserializer;
+
+public class TrackAddedEventDeserializer extends ObjectMapperDeserializer<TrackAddedEvent> {
+    public TrackAddedEventDeserializer() {
+        super(TrackAddedEvent.class);
+    }
 }

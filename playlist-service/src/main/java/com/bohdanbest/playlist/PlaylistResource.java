@@ -2,6 +2,7 @@ package com.bohdanbest.playlist;
 
 import com.bohdanbest.playlist.dto.PlaylistResponseDto;
 import com.bohdanbest.playlist.dto.TrackDto;
+import com.bohdanbest.playlist.event.TrackAddedEvent;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -9,6 +10,8 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import com.bohdanbest.playlist.client.CatalogClient;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.ArrayList;
@@ -22,6 +25,10 @@ public class PlaylistResource {
 
     @Inject SecurityIdentity identity;
     @Inject @RestClient CatalogClient catalogClient;
+
+    @Inject
+    @Channel("track-added-out")
+    Emitter<TrackAddedEvent> trackAddedEmitter;
 
     @GET
     public List<Playlist> getMyPlaylists() {
@@ -39,16 +46,13 @@ public class PlaylistResource {
     @GET
     @Path("/{id}")
     public PlaylistResponseDto getById(@PathParam("id") Long id) {
-        // Знаходимо плейлист
         Playlist playlist = Playlist.findById(id);
         if (playlist == null) throw new NotFoundException();
 
-        // Перевірка прав доступу (власник)
         if (!playlist.owner.equals(identity.getPrincipal().getName())) {
             throw new ForbiddenException();
         }
 
-        // Збираємо DTO
         PlaylistResponseDto response = new PlaylistResponseDto();
         response.id = playlist.id;
         response.name = playlist.name;
@@ -70,7 +74,6 @@ public class PlaylistResource {
     @Path("/{id}/tracks")
     @Transactional
     public void addTrack(@PathParam("id") Long id, Long trackId) {
-        // Перевірка існування в каталозі
         try { catalogClient.getTrack(trackId); }
         catch (Exception e) { throw new NotFoundException("Track not found in catalog"); }
 
@@ -79,13 +82,16 @@ public class PlaylistResource {
             throw new NotFoundException();
         }
 
-        // --- НОВА ЛОГІКА: ПЕРЕВІРКА НА ДУБЛІКАТИ ---
         if (playlist.trackIds.contains(trackId)) {
-            // Повертаємо 409 Conflict
             throw new WebApplicationException("Track already exists in this playlist", 409);
         }
 
         playlist.trackIds.add(trackId);
+
+        TrackAddedEvent event = new TrackAddedEvent(id, trackId, identity.getPrincipal().getName());
+        trackAddedEmitter.send(event);
+
+        System.out.println("Event sent to Kafka: " + event);
     }
 
     @DELETE
@@ -98,7 +104,6 @@ public class PlaylistResource {
             throw new NotFoundException();
         }
 
-        // Перевірка прав власника
         if (!playlist.owner.equals(identity.getPrincipal().getName())) {
             throw new ForbiddenException();
         }
@@ -121,7 +126,7 @@ public class PlaylistResource {
             throw new ForbiddenException();
         }
 
-        playlist.delete(); // Active Record видалення
+        playlist.delete();
     }
 
 }

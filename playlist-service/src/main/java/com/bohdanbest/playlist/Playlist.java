@@ -16,7 +16,6 @@ public class Playlist extends PanacheEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     public List<Long> trackIds = new ArrayList<>();
 
-    // Метод Active Record для пошуку
     public static List<Playlist> findByOwner(String owner) {
         return list("owner", owner);
     }

@@ -23,7 +23,7 @@ public class CatalogResource {
 
     @POST
     @Transactional
-    @RolesAllowed("admin") // Тільки адмін може додавати через REST
+    @RolesAllowed("admin")
     public Track add(Track track) {
         track.persist();
         return track;
@@ -37,20 +37,17 @@ public class CatalogResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("admin") // Тільки адмін може змінювати
+    @RolesAllowed("admin")
     public Track update(@PathParam("id") Long id, Track newTrack) {
-        // Active Record стиль: шукаємо об'єкт
         Track entity = Track.findById(id);
         if (entity == null) {
             throw new NotFoundException();
         }
 
-        // Оновлюємо поля
         entity.title = newTrack.title;
         entity.artist = newTrack.artist;
         entity.album = newTrack.album;
 
-        // Метод persist() не потрібен, оскільки ми в транзакції і об'єкт керований Hibernate
         return entity;
     }
 
@@ -63,9 +60,8 @@ public class CatalogResource {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("admin") // Тільки адмін може видаляти
+    @RolesAllowed("admin")
     public void delete(@PathParam("id") Long id) {
-        // Active Record стиль: видалення за ID
         boolean deleted = Track.deleteById(id);
         if (!deleted) {
             throw new NotFoundException();

@@ -14,6 +14,6 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 public interface UserClient {
 
     @GET
-    @Path("/me") // Ендпоінт для отримання поточного юзера
+    @Path("/me")
     UserDto getMe();
 }

@@ -6,26 +6,24 @@
     <title>Music Platform</title>
     <style>
         :root {
-            /* --- SOFT DARK PALETTE --- */
-            --bg-base: #121212;       /* Основний фон (м'який темний) */
-            --bg-sidebar: #121212;    /* Сайдбар зливається з фоном */
-            --bg-main: #121212;       /* Центр теж */
+            --bg-base: #121212;
+            --bg-sidebar: #121212;
+            --bg-main: #121212;
 
-            --bg-panel: #1e1e1e;      /* Панелі трохи світліші */
-            --bg-card: #252525;       /* Картки ще світліші */
-            --bg-hover: #333333;      /* Ховер */
-            --bg-input: #2c2c2c;      /* Інпути */
+            --bg-panel: #1e1e1e;
+            --bg-card: #252525;
+            --bg-hover: #333333;
+            --bg-input: #2c2c2c;
 
             --text-primary: #ffffff;
             --text-secondary: #b3b3b3;
 
-            --accent: #9d4edd;        /* Фіолетовий */
+            --accent: #9d4edd;
             --accent-hover: #7b2cbf;
 
             --danger: #e91e63;
             --bg-modal: rgba(0, 0, 0, 0.7);
 
-            /* Градієнт тепер плавно переходить у #121212 */
             --glow-gradient: linear-gradient(180deg, rgba(80, 25, 110, 0.5) 0%, rgba(18, 18, 18, 1) 100%);
         }
 
@@ -49,7 +47,6 @@
         ul { list-style: none; padding: 0; margin: 0; }
         h1, h2, h3, p { margin: 0; }
 
-        /* --- UTILS --- */
         .panel-box {
             background-color: var(--bg-panel);
             border-radius: 12px;
@@ -59,7 +56,6 @@
             height: 100%;
         }
 
-        /* ================= 1. LEFT SIDEBAR ================= */
         .sidebar-nav {
             padding: 20px 12px;
         }
@@ -115,12 +111,10 @@
         }
         .create-btn:hover { border-color: white; background: rgba(255,255,255,0.05); }
 
-        /* ================= 2. MAIN CONTENT ================= */
         .main-view {
             position: relative;
         }
 
-        /* GLOW EFFECT */
         .playlist-bg-gradient {
             position: absolute; top: 0; left: 0; width: 100%; height: 350px;
             background: var(--glow-gradient);
@@ -160,7 +154,6 @@
 
         .content-area { padding: 20px 30px 40px 30px; position: relative; z-index: 1; overflow-y: auto; height: calc(100% - 64px); }
 
-        /* Playlist Header */
         .hero-header { display: flex; align-items: flex-end; gap: 25px; margin-bottom: 30px; padding-bottom: 20px; }
         .hero-cover {
             width: 190px; height: 190px;
@@ -172,7 +165,6 @@
         .hero-info h1 { font-size: 3.5rem; font-weight: 800; margin: 10px 0; letter-spacing: -1px; line-height: 1; }
         .hero-meta { font-weight: 500; color: var(--text-secondary); }
 
-        /* Track Rows */
         .track-list-header {
             display: grid; grid-template-columns: 40px 1fr 1fr 40px;
             color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;
@@ -187,7 +179,6 @@
         .track-row:hover { background-color: rgba(255,255,255,0.08); color: white; }
         .track-title { color: white; font-weight: 500; font-size: 1rem; }
 
-        /* Grid Cards (Home) */
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
         .music-card {
             background: var(--bg-card); padding: 15px; border-radius: 8px;
@@ -207,7 +198,6 @@
         .music-card:hover .play-btn-overlay { opacity: 1; transform: translateY(0); }
         .play-btn-overlay:hover { transform: scale(1.05) !important; background: var(--accent-hover); }
 
-        /* ================= 3. RIGHT SIDEBAR ================= */
         .sidebar-right {
             padding: 20px;
             overflow-y: auto;
@@ -237,7 +227,6 @@
         .primary-btn { background-color: var(--text-primary); color: black; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 700; cursor: pointer; width: 100%; font-size: 0.95rem; }
         .primary-btn:hover { transform: scale(1.02); }
 
-        /* Modals */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-modal); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .modal { background: #242424; padding: 30px; border-radius: 12px; width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid #444; }
         .modal h3 { margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; }
